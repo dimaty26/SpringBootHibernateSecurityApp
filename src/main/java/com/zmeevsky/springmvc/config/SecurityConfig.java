@@ -2,6 +2,7 @@ package com.zmeevsky.springmvc.config;
 
 import com.zmeevsky.springmvc.handler.LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -20,6 +21,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    @Qualifier(value = "userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
 
     @Override
@@ -62,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
-                .antMatchers("/resources/**", "/js/**", "/css/**", "/fonts/**");
+                .antMatchers("/resources/**", "/static/**", "/js/**", "/css/**", "/fonts/**");
     }
 
     @Bean

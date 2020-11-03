@@ -44,7 +44,7 @@ public class UserDaoImpl implements UserDao {
         updatedUser.setFirstName(user.getFirstName());
         updatedUser.setLastName(user.getLastName());
         updatedUser.setEmail(user.getEmail());
-        updatedUser.setPassword(user.getPassword());
+        updatedUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         entityManager.merge(updatedUser);
     }
 

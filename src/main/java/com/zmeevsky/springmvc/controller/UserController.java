@@ -78,6 +78,12 @@ public class UserController {
         return "admin-page";
     }
 
+    @GetMapping("/findOne")
+    @ResponseBody
+    public User findOne(Integer userId) {
+        return userService.getUser(userId);
+    }
+
     @GetMapping("/show-form-for-add")
     public String showFormForAdd(Model model) {
 
@@ -107,13 +113,12 @@ public class UserController {
     public String showFormForUpdate(@RequestParam("userId") int id, Model model) {
 
         model.addAttribute("user", userService.getUser(id));
-        model.addAttribute("roles", roleDao.getAll());
 
         return "update-form";
     }
 
     @PostMapping("/update-user")
-    public String updateUser(@ModelAttribute("user") User user) {
+    public String updateUser(User user) {
 
         userService.updateUser(user);
 
