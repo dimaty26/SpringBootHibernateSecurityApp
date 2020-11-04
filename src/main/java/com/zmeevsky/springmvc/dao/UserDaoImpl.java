@@ -1,7 +1,7 @@
 package com.zmeevsky.springmvc.dao;
 
-import com.zmeevsky.springmvc.entity.Role;
 import com.zmeevsky.springmvc.entity.User;
+import com.zmeevsky.springmvc.exception.UserAlreadyExistsException;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -34,6 +34,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void saveUser(User user) {
 
+        String email = user.getEmail();
+
+        try {
+            findByUsername(email);
+            throw new UserAlreadyExistsException("User with email " + email + " already exists.");
+        } catch (NoResultException ignored) {
+        }
+
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         entityManager.merge(user);
     }
@@ -44,7 +52,11 @@ public class UserDaoImpl implements UserDao {
         updatedUser.setFirstName(user.getFirstName());
         updatedUser.setLastName(user.getLastName());
         updatedUser.setEmail(user.getEmail());
-        updatedUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        if (!user.getPassword().equals(updatedUser.getPassword())) {
+            if (!bCryptPasswordEncoder.matches(user.getPassword(), updatedUser.getPassword())) {
+                updatedUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            }
+        }
         entityManager.merge(updatedUser);
     }
 

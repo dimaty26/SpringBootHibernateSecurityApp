@@ -3,6 +3,7 @@ package com.zmeevsky.springmvc.controller;
 import com.zmeevsky.springmvc.dao.RoleDao;
 import com.zmeevsky.springmvc.entity.Role;
 import com.zmeevsky.springmvc.entity.User;
+import com.zmeevsky.springmvc.exception.UserAlreadyExistsException;
 import com.zmeevsky.springmvc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -71,8 +72,12 @@ public class UserController {
             sb.append(role).append(" ");
         }
 
+        String userName = principal.getName();
+        User user = userService.findByUsername(userName);
+
+        model.addAttribute("user", user);
         model.addAttribute("userList", users);
-        model.addAttribute("username", principal.getName());
+        model.addAttribute("username", userName);
         model.addAttribute("roleSet", new String(sb));
 
         return "admin-page";
@@ -98,14 +103,21 @@ public class UserController {
                            @RequestParam("lastName") String lastName,
                            @RequestParam("email") String email,
                            @RequestParam("password") String password,
-                           @RequestParam("roles") String[] roleIds) {
+                           @RequestParam("roles") String[] roleIds,
+                           Model model) {
 
         Set<Role> roleSet = new HashSet<>();
         for (String roleId : roleIds) {
-            roleSet.add(roleDao.getOne(Integer.parseInt(roleId)));
+            if (!"".equals(roleId)) {
+                roleSet.add(roleDao.getOne(Integer.parseInt(roleId)));
+            }
         }
-        userService.saveUser(new User(firstName, lastName, email, password, roleSet));
 
+        try {
+            userService.saveUser(new User(firstName, lastName, email, password, roleSet));
+        } catch (UserAlreadyExistsException e) {
+            model.addAttribute("existedEmail", email);
+        }
         return "redirect:/users/admin";
     }
 

@@ -19,6 +19,22 @@ $(document).ready(function(){
         $(".modal-backdrop").remove();
     });
 
+    $("#addUserForm").validate({
+       rules: {
+                roles: {
+                    required: function (element) {
+                        var boxes = $('.checkbox');
+                        return boxes.filter(':checked').length === 0;
+
+                    },
+                    minLength: 1
+                }
+       },
+        messages: {
+           roles: "Please select at least one role."
+        }
+    });
+
     // $('.btn-delete').on('click', function (e) {
     //     e.preventDefault();
     //     var href =$(this).attr('href');
